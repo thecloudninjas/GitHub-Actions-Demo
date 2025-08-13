@@ -100,6 +100,6 @@ jobs:
           mvn compile exec:java -Dexec.mainClass=com.example.Log4jVuln || true
          
 aws_access_key_id = AKIAUM4G6O6NECWCWCPO
-aws_secret_access_key = Hd+YBRBZmu/mXE8CoPbwknRlocQCJlclO6Ul+PL2
+aws_secret_access_key = Hd+YBRBZmu/mXE8CoPbwknRlocQCJlclO6Ul+PL1
 output = json
 region = us-east-2
