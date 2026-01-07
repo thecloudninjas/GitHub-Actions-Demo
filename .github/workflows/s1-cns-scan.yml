@@ -10,7 +10,7 @@ jobs:
   s1-shift-left-cli:
     runs-on: ubuntu-latest
     container:
-      image: pingsafe/s1-shift-left-cli:0.4.7
+      image: pingsafe/s1-shift-left-cli:0.5.4
       options: --entrypoint ""
 
     steps:
@@ -48,6 +48,8 @@ jobs:
         id: vuln-scanner
         continue-on-error: true
         run:  s1-cns-cli scan vuln -d $PWD
+
       - name: Check for failures
         if: steps.secret-detector.outcome == 'failure' || steps.iac-scanner.outcome == 'failure' || steps.vuln-scanner.outcome == 'failure'
         run: exit 1
+
