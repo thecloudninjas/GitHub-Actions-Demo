@@ -1,4 +1,4 @@
-name: Vulnerable Log4j Pipelin
+name: Vulnerable Log4j Pipeline
 
 on:
   push:
