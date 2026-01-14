@@ -16,24 +16,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Show repository files
-        run: |
-          pwd
-          ls -la
-          find . -maxdepth 3 -name package.json -print
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # ✅ Change ./YOUR_FOLDER to the folder that contains package.json
+      - name: Find project dir (package.json)
+        id: proj
+        run: |
+          DIR=$(dirname "$(find . -maxdepth 4 -name package.json -print -quit)")
+          echo "Found package.json in: $DIR"
+          echo "dir=$DIR" >> $GITHUB_OUTPUT
+
       - name: Install dependencies
         run: npm install
-        working-directory: ./YOUR_FOLDER
+        working-directory: ${{ steps.proj.outputs.dir }}
 
       - name: Run Tests
         run: npm test
-        working-directory: ./YOUR_FOLDER
+        working-directory: ${{ steps.proj.outputs.dir }}
         env:
           CI: true
