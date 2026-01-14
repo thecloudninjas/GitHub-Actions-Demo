@@ -3,32 +3,28 @@ name: Feature Branch CI
 on:
   push:
     branches:
-      - 'feature/*'  # Triggers on any branch like feature/task-1
+      - 'feature/*'
   pull_request:
     branches:
-      - main        # Triggers when a PR targets the main branch
+      - main
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Mandatory step to pull your code into the runner
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Setup Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Use your preferred version
-          cache: 'npm'       # Speeds up future runs
+          node-version: '20'
 
-      # 3. Install dependencies 
-      # NOTE: If package.json is in a subfolder, add: working-directory: ./your-folder
       - name: Install dependencies
         run: npm install
 
-      # 4. Run your tests
       - name: Run Tests
         run: npm test
+        env:
+          CI: true
