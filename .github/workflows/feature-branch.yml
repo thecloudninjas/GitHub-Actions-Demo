@@ -1,0 +1,32 @@
+name: Feature Branch CI
+
+on:
+  push:
+    # Trigger on any branch starting with 'feature/'
+    branches: 
+      - 'feature/*'
+  pull_request:
+    # Trigger when a PR is opened from any branch targeting 'main'
+    branches:
+      - main
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Lint Code
+        run: npm run lint
