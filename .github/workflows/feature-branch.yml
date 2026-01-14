@@ -16,15 +16,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Show repository files
+        run: |
+          pwd
+          ls -la
+          find . -maxdepth 3 -name package.json -print
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
+      # ✅ Change ./YOUR_FOLDER to the folder that contains package.json
       - name: Install dependencies
         run: npm install
+        working-directory: ./YOUR_FOLDER
 
       - name: Run Tests
         run: npm test
+        working-directory: ./YOUR_FOLDER
         env:
           CI: true
